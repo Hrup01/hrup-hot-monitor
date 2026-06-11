@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HotPulse - AI 热点雷达</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="ambient-grid" aria-hidden="true"></div>
+  <div class="background-beams" aria-hidden="true">
+    <span class="beam beam-a"></span>
+    <span class="beam beam-b"></span>
+    <span class="beam beam-c"></span>
+  </div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"></div>
+      <div>
+        <strong id="brandName">HotPulse</strong>
+        <span id="brandSubtitle">AI 热点雷达</span>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button id="runNow" class="scan-btn" type="button">
+        <span class="scan-icon" aria-hidden="true"></span>
+        <span>立即扫描</span>
+      </button>
+      <button id="enablePush" class="notify-btn" type="button" aria-label="浏览器通知">
+        <span class="bell-icon" aria-hidden="true"></span>
+        <strong id="notifyCount">0</strong>
+      </button>
+    </div>
+  </header>
+
+  <main class="shell">
+    <nav class="tabs" aria-label="HotPulse 功能">
+      <button class="tab active" type="button" data-tab="radar">
+        <span class="pulse-line" aria-hidden="true"></span>
+        热点雷达
+      </button>
+      <button class="tab" type="button" data-tab="terms">
+        <span class="target-icon" aria-hidden="true"></span>
+        监控词
+      </button>
+      <button class="tab" type="button" data-tab="search">
+        <span class="search-icon" aria-hidden="true"></span>
+        搜索
+      </button>
+    </nav>
+
+    <section class="stats-grid" aria-label="热点概览">
+      <article class="stat-card">
+        <span>总热点</span>
+        <strong id="totalHotspots">0</strong>
+      </article>
+      <article class="stat-card cyan">
+        <span>今日新增</span>
+        <strong id="todayNew">0</strong>
+      </article>
+      <article class="stat-card danger">
+        <span>紧急热点</span>
+        <strong id="urgentHotspots">0</strong>
+      </article>
+      <article class="stat-card green">
+        <span>监控词</span>
+        <strong id="watchTermCount">0</strong>
+      </article>
+    </section>
+
+    <section id="radarPanel" class="tab-panel active">
+      <div class="section-head">
+        <div>
+          <span class="fire-icon" aria-hidden="true"></span>
+          <h1>实时热点流</h1>
+        </div>
+        <div class="section-actions">
+          <button id="detailToggleAll" class="ghost-btn" type="button">展开全部理由</button>
+          <span id="refreshLabel">每 30 分钟自动更新</span>
+        </div>
+      </div>
+      <section class="filter-panel" aria-label="排序和筛选">
+        <div class="filter-grid">
+          <label class="field compact-field">
+            <span>排序方式</span>
+            <select id="sortOrder">
+              <option value="score_desc">热度分从高到低</option>
+              <option value="time_desc">最近更新优先</option>
+              <option value="level_desc">热点等级优先</option>
+              <option value="coverage_desc">多源覆盖度优先</option>
+            </select>
+          </label>
+          <label class="field compact-field">
+            <span>最低分</span>
+            <input id="minScore" type="range" min="0" max="100" step="5" value="0" />
+          </label>
+          <label class="field compact-field">
+            <span>时间范围</span>
+            <select id="timeRange">
+              <option value="all">全部</option>
+              <option value="24h">近 24 小时</option>
+              <option value="7d">近 7 天</option>
+            </select>
+          </label>
+          <label class="field compact-field grow">
+            <span>搜索热点</span>
+            <input id="searchFilter" placeholder="搜索标题、摘要、标签或主题" autocomplete="off" />
+          </label>
+        </div>
+        <div class="toggle-row">
+          <label class="toggle-chip">
+            <input id="newOnly" type="checkbox" />
+            <span>仅看新热点</span>
+          </label>
+          <label class="toggle-chip">
+            <input id="resonanceOnly" type="checkbox" />
+            <span>仅看多源共振 (>=3)</span>
+          </label>
+          <button id="resetFilters" class="ghost-btn" type="button">重置筛选</button>
+          <span id="filterSummary" class="filter-summary">显示 0 / 0</span>
+        </div>
+        <div class="option-group">
+          <div class="option-head">
+            <strong>热点等级</strong>
+          </div>
+          <div id="levelFilters" class="option-chips"></div>
+        </div>
+        <div class="option-group">
+          <div class="option-head">
+            <strong>来源</strong>
+          </div>
+          <div id="sourceFilters" class="option-chips"></div>
+        </div>
+      </section>
+      <div id="hotspotList" class="hotspot-list"></div>
+    </section>
+
+    <section id="termsPanel" class="tab-panel">
+      <article class="panel spotlight">
+        <div class="panel-head">
+          <div>
+            <p class="section-kicker">Watch Terms</p>
+            <h2>监控词</h2>
+          </div>
+          <button id="saveTerms" class="ghost-btn" type="button">保存监控词</button>
+        </div>
+        <label class="field">
+          <span>每行一个关键词</span>
+          <textarea id="watchTerms" placeholder="Claude Opus 4.6&#10;AI Agent&#10;Cursor"></textarea>
+        </label>
+        <div id="termChips" class="term-chips"></div>
+      </article>
+    </section>
+
+    <section id="searchPanel" class="tab-panel">
+      <article class="panel spotlight">
+        <div class="panel-head">
+          <div>
+            <p class="section-kicker">Search</p>
+            <h2>快速搜索</h2>
+          </div>
+          <button id="searchNow" class="ghost-btn" type="button">搜索并扫描</button>
+        </div>
+        <label class="field">
+          <span>搜索主题</span>
+          <input id="query" placeholder="输入你现在最想追的 AI 编程热点" autocomplete="off" />
+        </label>
+      </article>
+    </section>
+
+    <section class="system-row">
+      <div id="sourceStatus" class="source-status"></div>
+      <span id="pushState">通知待授权</span>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
